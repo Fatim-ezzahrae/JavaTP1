@@ -1,2 +1,0 @@
-# JavaTP1
-S3: JAVA TP 1
