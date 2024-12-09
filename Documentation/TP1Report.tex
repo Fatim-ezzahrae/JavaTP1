@@ -1,0 +1,91 @@
+\documentclass[a4paper,12pt]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{xcolor}
+
+\geometry{top=1in, bottom=1in, left=1in, right=1in}
+
+% Couleurs personnalisées
+\definecolor{myblue}{RGB}{50, 100, 200}
+\definecolor{mygreen}{RGB}{50, 150, 50}
+\definecolor{myred}{RGB}{200, 50, 50}
+
+\title{\textbf{Structure du Projet de Gestion des Employés}}
+\author{Nom de l'étudiant}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{\textcolor{myblue}{Structure du Dossier}}
+
+Le dossier se compose de cinq sections principales : **Model**, **DAO**, **Controller**, **View** et **Main**.
+
+\section*{\textcolor{myblue}{1. Model}}
+
+Cette section contient la classe \texttt{Employe}, qui représente la structure des données relatives à un employé. Les principales caractéristiques de cette classe sont :
+
+\begin{itemize}
+    \item Les \textbf{constructeurs}, permettant de créer des objets \texttt{Employe} avec différents ensembles de paramètres.
+    \item Les \textbf{énumérations} pour définir les rôles et les postes, garantissant que seules des valeurs valides peuvent être utilisées.
+    \item Les \textbf{getters} pour accéder aux propriétés de la classe, conformément aux principes de l'encapsulation.
+\end{itemize}
+
+\section*{\textcolor{myblue}{2. DAO (Data Access Object)}}
+
+Cette section contient les classes et l'interface nécessaires pour interagir avec la base de données. Elle est composée des éléments suivants :
+
+\subsection*{\textcolor{mygreen}{2.1 Classe \texttt{DBConnection}}}
+Cette classe contient la méthode qui établit une connexion avec la base de données. Elle utilise \texttt{JDBC} pour assurer une connexion fiable et sécurisée. Les paramètres de connexion, tels que l'URL, le nom d'utilisateur et le mot de passe, sont configurés dans cette classe.
+
+\subsection*{\textcolor{mygreen}{2.2 Interface \texttt{EmployeeDAOI}}}
+Cette interface définit les signatures des méthodes nécessaires pour les opérations CRUD (Create, Read, Update, Delete) et autres actions. Les méthodes incluent :
+\begin{itemize}
+    \item \texttt{Add()} : Ajouter un employé.
+    \item \texttt{Update()} : Mettre à jour les informations d’un employé.
+    \item \texttt{Delete()} : Supprimer un employé.
+    \item \texttt{findAll()} : Récupérer une liste de tous les employés.
+    \item \texttt{FindById()} : Trouver un employé en fonction de son ID.
+\end{itemize}
+
+\subsection*{\textcolor{mygreen}{2.3 Classe \texttt{EmployeeDAOImpl}}}
+Cette classe implémente l'interface \texttt{EmployeeDAOI}. Elle contient le corps des méthodes déclarées dans l'interface, ainsi que d'autres méthodes pour interagir avec la base de données, telles que :
+\begin{itemize}
+    \item \texttt{getEmployees()} : Récupère tous les employés avec leurs informations.
+    \item \texttt{getRoles()} : Récupère la liste des rôles disponibles.
+    \item \texttt{getPostes()} : Récupère la liste des postes disponibles.
+\end{itemize}
+
+\section*{\textcolor{myblue}{3. View}}
+
+Cette section correspond à l'interface utilisateur. Elle inclut :
+\begin{itemize}
+    \item Les \textbf{champs de saisie} pour entrer les informations relatives aux employés.
+    \item Une \textbf{table des employés} affichant les données sous forme tabulaire.
+    \item Les \textbf{boutons} pour les actions telles que Ajouter, Modifier, Supprimer, Afficher et Trouver.
+    \item Une méthode pour afficher un panneau secondaire demandant l'ID d'un employé lors de l'utilisation du bouton "Trouver".
+\end{itemize}
+
+De plus, cette classe contient des getters pour accéder aux boutons et champs de texte, facilitant ainsi l'interaction avec le contrôleur.
+
+\section*{\textcolor{myblue}{4. Controller}}
+
+Cette section agit comme un pont entre le DAO et la vue. Elle inclut les fonctionnalités suivantes :
+\begin{itemize}
+    \item Ajout de \textbf{listeners d'action} (\texttt{ActionListener}) aux boutons de l'interface utilisateur.
+    \item Récupération des données saisies par l'utilisateur dans les champs et leur transmission en tant que paramètres aux méthodes appropriées du DAO.
+    \item Mise à jour de l'interface utilisateur pour refléter les modifications après chaque opération.
+    \item Affichage de \textbf{messages d'information} ou d'erreur à l'utilisateur en fonction du résultat de son action.
+\end{itemize}
+
+\section*{\textcolor{myblue}{5. Main}}
+
+Le point d'entrée de l'application. Il initialise la connexion avec la base de données, crée les instances nécessaires des classes DAO, View et Controller, et démarre l'application.
+
+\section*{\textcolor{myblue}{Conclusion}}
+
+Cette structure modulaire permet une séparation claire des responsabilités, facilitant la maintenance, l'ajout de nouvelles fonctionnalités et le test de l'application. Grâce à cette organisation, l'application garantit une expérience utilisateur fluide et une interaction efficace avec la base de données.
+
+\end{document}
