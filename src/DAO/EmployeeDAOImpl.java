@@ -7,7 +7,7 @@ import Model.Employe;
 import Model.Employe.Poste;
 import Model.Employe.Role;
 
-public class EmployeeDAOImpl implements EmployeeDAOI{
+public class EmployeeDAOImpl implements GenericDAOI<Employe>{
 	
 	private Connection conn;
 	
@@ -18,10 +18,8 @@ public class EmployeeDAOImpl implements EmployeeDAOI{
 	}
 
 	@Override
-	public Object[][] findById(int employeId) throws SQLException{
-		String sql = "SELECT IdEmp, nom, prenom, email, tel, salaire, poste, role FROM Employe "
-				+ "join Poste on Employe.idPoste = Poste.id "
-				+ "join Role on Employe.idRole = Role.id WHERE idEmp = ?";
+	public Object[][] findById(int employeId) throws Exception{
+		String sql = "SELECT idEmp, nom, prenom, email, tel, salaire, Role, Poste FROM Employe WHERE idEmp = ?";
 		
 		try(PreparedStatement stmt = conn.prepareStatement(sql)) {
 			stmt.setInt(1, employeId);
@@ -30,21 +28,21 @@ public class EmployeeDAOImpl implements EmployeeDAOI{
 			if (rs.next()) {
 				Object[][] empData = new Object[1][8]; // Assuming 1 row with 8 columns
 
-	            empData[0][0] = rs.getInt("IdEmp");          // ID
+	            empData[0][0] = rs.getInt("idEmp");          // ID
 	            empData[0][1] = rs.getString("nom");         // Nom
 	            empData[0][2] = rs.getString("prenom");      // Prénom
 	            empData[0][3] = rs.getString("email");       // Email
-	            empData[0][4] = rs.getInt("salaire");        // Salaire
-	            empData[0][5] = rs.getInt("tel");            // Téléphone
-	            empData[0][6] = rs.getString("role");        // Role
-	            empData[0][7] = rs.getString("poste");       // Poste
+	            empData[0][4] = rs.getString("tel");            // Téléphone
+	            empData[0][5] = rs.getInt("salaire");        // Salaire	            
+	            empData[0][6] = rs.getString("Role");        // Role
+	            empData[0][7] = rs.getString("Poste");       // Poste
 
 	            return empData;
 				
 			}
 			
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new Exception("Error in findById emp: " + e.getMessage(), e);
 		}	
 		
 		return null; 
@@ -54,184 +52,61 @@ public class EmployeeDAOImpl implements EmployeeDAOI{
 	 int idRole = -1;
 
 	@Override
-	public void add(Employe employe) throws SQLException{
-	
-		String sql = "SELECT id FROM Poste where poste = ?";
+	public void add(Employe employe) throws Exception{
+				
+		String sql = "Insert Into Employe (nom, prenom, email, tel, salaire, Poste, Role ) values (?,?,?,?,?,?,?)";
 		
 		try(PreparedStatement stmt = conn.prepareStatement(sql)) {
-			
-			stmt.setString(1, employe.getPoste().toString());
-			try (ResultSet rs = stmt.executeQuery()) {
-	            if (rs.next()) {
-	                idPoste = rs.getInt("id");
-	            } else {
-	                throw new SQLException("Poste not found: " + employe.getPoste().toString());
-	            }
-	        }
-			
-		} catch (SQLException e) {
-			e.printStackTrace();		
-		}
-		
-		String sql2 = "SELECT id FROM Role where role = ?";
-		
-		try(PreparedStatement stmt = conn.prepareStatement(sql2)) {
-			
-			stmt.setString(1, employe.getRole().toString());
-			try (ResultSet rs = stmt.executeQuery()) {
-	            if (rs.next()) {
-	                idRole = rs.getInt("id");
-	            } else {
-	                throw new SQLException("Role not found: " + employe.getRole().toString());
-	            }
-	        }
-			
-		} catch (SQLException e) {
-			e.printStackTrace();		
-		}
-			
-		String sql3 = "Insert Into Employe (nom, prenom, email, tel, salaire, idPoste, idRole ) values (?,?,?,?,?,?,?)";
-		
-		try(PreparedStatement stmt = conn.prepareStatement(sql3)) {
 			
 			stmt.setString(1, employe.getNom());
 			stmt.setString(2, employe.getPrenom());
 			stmt.setString(3, employe.getEmail());
-			stmt.setInt(4, employe.getTel());
+			stmt.setString(4, employe.getTel());
 			stmt.setInt(5, employe.getSalaire());
-			stmt.setInt(6, idPoste);
-			stmt.setInt(7, idRole);
+			stmt.setString(6, employe.getPoste().name());
+			stmt.setString(7, employe.getRole().name());
 			stmt.executeUpdate();
 			
 		} catch (SQLException e) {
-			e.printStackTrace();		
+			throw new Exception("Error in add Emp: " + e.getMessage(), e);		
 		}
 	}
 	
 
-	public void update(Employe employe, int emp_id) throws SQLException {
+	public void update(Employe employe, int emp_id) throws Exception {
 		
-		String sql = "SELECT id FROM Poste where poste = ?";
-		
-		try(PreparedStatement stmt = conn.prepareStatement(sql)) {
-			
-			stmt.setString(1, employe.getPoste().toString());
-			try (ResultSet rs = stmt.executeQuery()) {
-	            if (rs.next()) {
-	                idPoste = rs.getInt("id");
-	            } else {
-	                throw new SQLException("Poste not found: " + employe.getPoste().toString());
-	            }
-	        }
-			
-		} catch (SQLException e) {
-			e.printStackTrace();		
-		}
-		
-		String sql2 = "SELECT id FROM Role where role = ?";
-		
-		try(PreparedStatement stmt = conn.prepareStatement(sql2)) {
-			
-			stmt.setString(1, employe.getRole().toString());
-			try (ResultSet rs = stmt.executeQuery()) {
-	            if (rs.next()) {
-	                idRole = rs.getInt("id");
-	            } else {
-	                throw new SQLException("Role not found: " + employe.getRole().toString());
-	            }
-	        }
-			
-		} catch (SQLException e) {
-			e.printStackTrace();		
-		}
-		
-		String sql3 = "UPDATE employe SET nom = ?, prenom = ?, email = ?, tel = ?, salaire = ?, idPoste = ?, idRole = ? where idEmp = ?";
+		String sql3 = "UPDATE employe SET nom = ?, prenom = ?, email = ?, tel = ?, salaire = ?, Poste = ?, Role = ? where idEmp = ?";
 		
 		try(PreparedStatement stmt = conn.prepareStatement(sql3)) {
 			
 			stmt.setString(1, employe.getNom());
 			stmt.setString(2, employe.getPrenom());
 			stmt.setString(3, employe.getEmail());
-			stmt.setInt(4, employe.getTel());
+			stmt.setString(4, employe.getTel());
 			stmt.setInt(5, employe.getSalaire());
-			stmt.setInt(6, idPoste);
-			stmt.setInt(7, idRole);
+			stmt.setString(6, employe.getPoste().name());
+			stmt.setString(7, employe.getRole().name());
 			stmt.setInt(8, emp_id);
 			stmt.executeUpdate();
 			
 		} catch (SQLException e) {
-			throw e;		
+			throw new Exception("Error in update Emp: " + e.getMessage(), e);			
 		}
 		
 	}
 	
-	public void delete(int emp_id) throws SQLException{
-		
-		String sql = "delete from employe where idEmp = ?";
-		try(PreparedStatement stmt = conn.prepareStatement(sql)) {
-			stmt.setInt(1, emp_id);
-			stmt.executeUpdate();
-		} catch (SQLException e) {
-			throw e;
-		}
-	}
-	
-	public Object[][] findAll() throws SQLException{
+	public Object[][] findAll() throws Exception{
 		
 		Object[][] newData = getEmployes(); // Fetch new data
 		return newData;
 		
 	}
-	
-	public ArrayList<String> getRoles() {
 		
-		ArrayList<String> roles = new ArrayList<>();
-		
-		String sql = "SELECT role FROM Role";
-		try(PreparedStatement stmt = conn.prepareStatement(sql)) {
-			
-			ResultSet rs = stmt.executeQuery();
-			
-			while(rs.next()) {
-				roles.add(rs.getString("role"));
-			}
-			
-		} catch (SQLException e) {
-            e.printStackTrace();
-        }
-		
-		return roles;
-		
-	}
-	
-	public ArrayList<String> getPostes() {
-		
-		ArrayList<String> postes = new ArrayList<>();
-		
-		String sql = "SELECT poste FROM Poste";
-		try(PreparedStatement stmt = conn.prepareStatement(sql)) {
-			
-			ResultSet rs = stmt.executeQuery();
-			
-			while(rs.next()) {
-				postes.add(rs.getString("poste"));
-			}
-			
-		} catch (SQLException e) {
-            e.printStackTrace();
-        }
-		
-		return postes;
-		
-	}
-	
-	public Object[][] getEmployes() {
+	public Object[][] getEmployes() throws Exception {
 		
 		ArrayList<Employe> employes = new ArrayList<>();
 		
-		String sql = "SELECT idEmp, nom, prenom, email, salaire, tel, role, poste FROM Employe "
-				+ "join Poste on Employe.idPoste = Poste.id "
-				+ "join Role on Employe.idRole = Role.id";
+		String sql = "SELECT idEmp, nom, prenom, email, tel, salaire, Role, Poste FROM Employe";
 		
 		try(PreparedStatement stmt = conn.prepareStatement(sql)) {
 			
@@ -244,16 +119,16 @@ public class EmployeeDAOImpl implements EmployeeDAOI{
 		                rs.getString("nom"),
 		                rs.getString("prenom"),
 		                rs.getString("email"),
+		                rs.getString("tel"),
 		                rs.getInt("salaire"),
-		                rs.getInt("tel"),
-		                Role.valueOf(rs.getString("role").toUpperCase()), 
-		                Poste.valueOf(rs.getString("poste").toUpperCase()) 
+		                rs.getString("Role"), 
+		                rs.getString("Poste") 
 		            );
 				employes.add(employe);
 			}
 			
 		} catch (SQLException e) {
-            e.printStackTrace();
+			throw new Exception("Error in getEmployes: " + e.getMessage(), e);	
         }
 		
 		Object[][] data = new Object[employes.size()][8]; // 8 columns for the data
@@ -263,10 +138,10 @@ public class EmployeeDAOImpl implements EmployeeDAOI{
 	        data[i][1] = emp.getNom();        // Nom
 	        data[i][2] = emp.getPrenom();     // Prénom
 	        data[i][3] = emp.getEmail();      // Email
-	        data[i][4] = emp.getSalaire();    // Salaire
-	        data[i][5] = emp.getTel();        // Téléphone
-	        data[i][6] = emp.getRole().toString(); // Role
-	        data[i][7] = emp.getPoste().toString(); // Poste
+	        data[i][4] = emp.getTel();        // Téléphone
+	        data[i][5] = emp.getSalaire();    // Salaire
+	        data[i][6] = emp.getRoleSt(); // Role
+	        data[i][7] = emp.getPosteSt(); // Poste
 	    }
 	    
 		
@@ -274,5 +149,44 @@ public class EmployeeDAOImpl implements EmployeeDAOI{
 		
 	}
 
+	@Override
+	public void delete(Employe employe) throws Exception {
+		String sql = "delete from employe where idEmp = ?";
+		try(PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setInt(1, employe.getIdEmp());
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+			throw new Exception("Error in delete emp: " + e.getMessage(), e);
+		}
+		
+	}
+	
+	public Employe getEmployeById(int emp_id) throws Exception{
+		
+		String sql = "SELECT nom, prenom, email, tel, salaire, Role, Poste FROM Employe where idEmp = ?";
+		try(PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setInt(1, emp_id);			
+			ResultSet rs = stmt.executeQuery();
+			
+			while(rs.next()) {				
+				Employe employe = new Employe(	
+		                rs.getString("nom"),
+		                rs.getString("prenom"),
+		                rs.getString("email"),
+		                rs.getString("tel"),
+		                rs.getInt("salaire"),
+		                rs.getString("Role"), 
+		                rs.getString("Poste") 
+		            );
+				return employe;
+			}			
+		} catch (SQLException e) {
+			throw new Exception("Error in getEmployesById: " + e.getMessage(), e);
+		}
+		return null;
+		
+	}
+
+	
 	
 }

@@ -7,11 +7,12 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 import DAO.EmployeeDAOImpl;
+import Model.Employe.Poste;
+import Model.Employe.Role;
+import Model.EmployeModel;
 
-public class EmployeeView extends JFrame{
+public class EmployeeView extends JPanel{
 	
-	
-	EmployeeDAOImpl dao = new EmployeeDAOImpl();
 	JButton addButton = new JButton("Ajouter");
 	JButton updateButton = new JButton("Modifier");
 	JButton deleteButton = new JButton("Supprimer");
@@ -24,32 +25,20 @@ public class EmployeeView extends JFrame{
 	JTextField salaire = new JTextField(20);
 	JTable tbl;
 	DefaultTableModel tableModel; // default Jtable so I can refresh it without recreating it
-	String[] tableColumns = {"ID", "Nom", "Prénom", "Email", "Salaire", "tel", "Role", "Poste"};
-	JComboBox<String> rolesCombo;
-	JComboBox<String> postesCombo;
+	String[] tableColumns = {"ID", "Nom", "Prénom", "Email", "tel", "Salaire",  "Role", "Poste"};
+	JComboBox<Role> rolesCombo;
+	JComboBox<Poste> postesCombo;
 	
 	public EmployeeView() {
-		
-		
-		
-		ArrayList<String> roles = dao.getRoles();
-		rolesCombo = new JComboBox<>(roles.toArray(new String[0]));
-		ArrayList<String> postes = dao.getPostes();
-		postesCombo = new JComboBox<>(postes.toArray(new String[0]));
-		
-		
+		rolesCombo = new JComboBox<>(Role.values());
+		postesCombo = new JComboBox<>(Poste.values());
 		
 		tableModel = new DefaultTableModel(new Object[][] {}, tableColumns);
 		tbl = new JTable(tableModel);
 		tbl.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 	    tbl.setFillsViewportHeight(true);
 		
-		setTitle("Gestion des employées");
-		setSize(850,500);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setLocationRelativeTo(null);
 		
-		setLayout(new BorderLayout());
 		
 		JPanel data = new JPanel();
 		data.setLayout(new BorderLayout());
@@ -91,8 +80,6 @@ public class EmployeeView extends JFrame{
 		buttons.add(findIdButton);
 		
 		add(buttons, BorderLayout.SOUTH);
-		
-		setVisible(true);
 	}	
 	
 	// refresh the JTable
@@ -108,8 +95,8 @@ public class EmployeeView extends JFrame{
 	    tbl.getColumnModel().getColumn(1).setPreferredWidth(80);  // Nom
 	    tbl.getColumnModel().getColumn(2).setPreferredWidth(80);  // Prénom
 	    tbl.getColumnModel().getColumn(3).setPreferredWidth(160); // Email
-	    tbl.getColumnModel().getColumn(4).setPreferredWidth(60);  // Salaire
-	    tbl.getColumnModel().getColumn(5).setPreferredWidth(80);  // Tel
+	    tbl.getColumnModel().getColumn(4).setPreferredWidth(80);  // Tel
+	    tbl.getColumnModel().getColumn(5).setPreferredWidth(60);  // Salaire
 	    tbl.getColumnModel().getColumn(6).setPreferredWidth(100); // Role
 	    tbl.getColumnModel().getColumn(7).setPreferredWidth(200); // Poste
 	}
@@ -144,6 +131,34 @@ public class EmployeeView extends JFrame{
         }
 	}
 	
+	public boolean validateFields() {
+	    if (nom.getText().isEmpty() || prenom.getText().isEmpty() || email.getText().isEmpty() || tel.getText().isEmpty() || salaire.getText().isEmpty()) {
+	        JOptionPane.showMessageDialog(this, "All fields are required!", "Validation Error", JOptionPane.ERROR_MESSAGE);
+	        return false;
+	    }
+	    try {
+	        Integer.parseInt(tel.getText());
+	        Integer.parseInt(salaire.getText());
+	    } catch (NumberFormatException e) {
+	        JOptionPane.showMessageDialog(this, "Telephone and Salaire must be numbers.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+	        return false;
+	    }
+	    return true;
+	}
+
+	public void setUserRole(String userRole) {
+	    // Check the role and hide the buttons accordingly
+	    if (userRole.equals("MANAGER")) {
+	        addButton.setVisible(true);
+	        updateButton.setVisible(true);
+	        deleteButton.setVisible(true);
+	    } else {
+	        addButton.setVisible(false);
+	        updateButton.setVisible(false);
+	        deleteButton.setVisible(false);
+	    }
+	}
+
 	public JButton getAddButton() {
         return addButton;
     }
@@ -184,19 +199,11 @@ public class EmployeeView extends JFrame{
 		return salaire;
 	}
 	
-	public String getRole() {
-		return rolesCombo.getSelectedItem().toString();
-	}
-	
-	public String getPoste() {
-		return postesCombo.getSelectedItem().toString();
-	}
-	
-	public JComboBox<String> getRoleComboBox() {
+	public JComboBox<Role> getRole() {
 	    return rolesCombo;
 	}
 
-	public JComboBox<String> getPosteComboBox() {
+	public JComboBox<Poste> getPoste() {
 	    return postesCombo;
 	}
 	
@@ -205,9 +212,4 @@ public class EmployeeView extends JFrame{
 	}
 	
 	
-	
-	public static void main(String[] args) {
-		new EmployeeView();
-	}
-
 }
