@@ -20,6 +20,8 @@ public class HolidayView extends JPanel{
 	JButton addButton = new JButton("Ajouter");
 	JButton updateButton = new JButton("Modifier");
 	JButton deleteButton = new JButton("Supprimer");
+	JButton importButton = new JButton("Importer avec congé");
+	JButton exportButton = new JButton("Exporter avec congé");
 	
 	JTextField dateDebut = new JTextField("yyyy-MM-dd");
 	JTextField dateFin = new JTextField("yyyy-MM-dd");
@@ -80,6 +82,8 @@ public class HolidayView extends JPanel{
 		buttons.add(addButton);
 		buttons.add(updateButton);
 		buttons.add(deleteButton);
+		buttons.add(importButton);
+		buttons.add(exportButton);
 		
 		add(buttons, BorderLayout.SOUTH);
 		
@@ -105,12 +109,24 @@ public class HolidayView extends JPanel{
 	        addButton.setVisible(true);
 	        updateButton.setVisible(true);
 	        deleteButton.setVisible(true);
+	        importButton.setVisible(true);
+	        exportButton.setVisible(true);
 	    } else {
 	        addButton.setVisible(false);
 	        updateButton.setVisible(false);
 	        deleteButton.setVisible(false);
+	        importButton.setVisible(false);
+	        exportButton.setVisible(false);
 	    }
 	}
+	
+	public void showSuccessMessage(String message) {
+        JOptionPane.showMessageDialog(this, message, "Succès", JOptionPane.INFORMATION_MESSAGE);
+    }
+	
+	public void showErrorMessage(String message) {
+        JOptionPane.showMessageDialog(this, message, "Erreur", JOptionPane.ERROR_MESSAGE);
+    }
 	
 	public String getEmploye() {
 		return (String) employees.getSelectedItem();
@@ -146,6 +162,14 @@ public class HolidayView extends JPanel{
 	
 	public JButton getDeleteButton() {
         return deleteButton;
+    }
+	
+	public JButton getImportButton() {
+        return importButton;
+    }
+	
+	public JButton getExportButton() {
+        return exportButton;
     }
 	
 	public JTable getJTable() {

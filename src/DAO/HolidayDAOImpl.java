@@ -1,5 +1,10 @@
 package DAO;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -7,12 +12,13 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.List;
 
 import Model.Employe;
 import Model.Holiday;
 import Model.Holiday.HolidayType;
 
-public class HolidayDAOImpl implements GenericDAOI<Holiday>{
+public class HolidayDAOImpl implements GenericDAOI<Holiday>, DataImportExport<Holiday>{
 
 	private Connection conn;
 	
@@ -209,6 +215,47 @@ public class HolidayDAOImpl implements GenericDAOI<Holiday>{
 		return holidayList.toArray(new Object[0][0]);
 	}
 	
+	public List<String[]> ListHoliday() {
+
+	    String sql = "SELECT nom, prenom, email, tel, salaire, Role, Poste, "
+	               + "holiday.DDebut, holiday.DFin, typeholiday.type "
+	               + "FROM holiday "
+	               + "JOIN employe ON employe.idEmp = holiday.idEmp "
+	               + "JOIN typeholiday ON typeholiday.id = holiday.idType";
+
+	    List<String[]> empAndHolidayList = new ArrayList<>();
+
+	    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+	        ResultSet rs = stmt.executeQuery();
+
+	        while (rs.next()) {
+	            // Create an array to store the values for the current record
+	            String[] empAndHolidayInfo = {
+	                rs.getString("nom"),
+	                rs.getString("prenom"),
+	                rs.getString("email"),
+	                rs.getString("tel"),
+	                String.valueOf(rs.getInt("salaire")),
+	                rs.getString("Role"),
+	                rs.getString("Poste"),
+	                rs.getString("DDebut"),
+	                rs.getString("DFin"),
+	                rs.getString("type")
+	            };
+
+	            // Add the array to the list
+	            empAndHolidayList.add(empAndHolidayInfo);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return empAndHolidayList;
+	}
+
+	
 	//to get the number of holiday days left for the employee with this id
 	public int getEmployeeHoliday(int idEmp) {
 		
@@ -296,11 +343,70 @@ public class HolidayDAOImpl implements GenericDAOI<Holiday>{
 		}
 		return holiday;
 	}
-	
-	public static void main(String[] args) {
-		HolidayDAOImpl dao = new HolidayDAOImpl();
-		System.out.println(dao.getIdEmp("Jane Smith"));
+
+	@Override
+	public void importData(String filePath) throws IOException {
+		String sql = "Insert Into Employe (nom, prenom, email, tel, salaire, Poste, Role ) values (?,?,?,?,?,?,?)";
+
+		try(BufferedReader reader = new BufferedReader(new FileReader(filePath)); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+		    String line;		    
+		    while((line = reader.readLine()) != null) {
+		    	System.out.println("First Line: " + line);
+			    if (line == null) {
+			        System.out.println("The file is empty.");
+			    }
+		        String[] data = line.split(",");
+		        System.out.println("Data length: " + data.length); 
+		        if(data.length == 11) {
+		            System.out.println("Processing line: " + line);
+		            pstmt.setString(1, data[0].trim());
+		            pstmt.setString(2, data[1].trim());
+		            pstmt.setString(3, data[2].trim());
+		            pstmt.setString(4, data[3].trim());
+		            pstmt.setString(5, data[4].trim());
+		            pstmt.setString(6, data[5].trim());
+		            pstmt.setString(7, data[6].trim());
+		            pstmt.addBatch();
+		            Holiday holiday = new Holiday(
+		            		data[7].trim(),
+		            		data[8].trim(),
+		            		HolidayType.valueOf(data[9].trim()),
+		            		data[10].trim()
+		            		);
+		            add(holiday);
+		        } else {
+		            System.out.println("Skipping line due to incorrect number of data fields");
+		        }
+		    }
+		    pstmt.executeBatch();
+		    System.out.println("Holiday imported successfully!");            
+		} catch (IOException | SQLException e) {
+		    e.printStackTrace();    
+		}
+		
 	}
+	
+	@Override
+	public void exportData(String fileName, List<Holiday> data) throws IOException {
+		//non used
+	}
+
+	
+	public void exportDataSt(String filePath, List<String[]> data) throws IOException {
+	    try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+	        // Write the header
+	        writer.write("Nom, Prenom, Email, Tel, Salaire, Role, Poste, DDate, FDate, Type");
+	        writer.newLine();
+
+	        // Iterate over the data and write each record
+	        for (String[] record : data) {
+	            String line = String.join(", ", record); // Combine the array elements into a single line
+	            writer.write(line);
+	            writer.newLine();
+	        }
+	    }
+	}
+
 	
 	
 }

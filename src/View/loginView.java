@@ -19,7 +19,6 @@ public class loginView extends JFrame {
     JPasswordField password = new JPasswordField();
     JLabel passLabel = new JLabel("Password:");
     JButton logInButton = new JButton("LogIn");
-    JButton addUserButton = new JButton("Add User");
 
     public loginView() {
         setTitle("Login");
@@ -47,7 +46,6 @@ public class loginView extends JFrame {
         // Panel for buttons (LogIn and Add User)
         JPanel buttons = new JPanel();
         buttons.add(logInButton);
-        buttons.add(addUserButton);
 
         add(buttons, BorderLayout.SOUTH);
         setVisible(true);
@@ -63,10 +61,6 @@ public class loginView extends JFrame {
 
     public JButton getLoginButton() {
         return logInButton;
-    }
-
-    public JButton getAddUserButton() {
-        return addUserButton;
     }
 
     public static void main(String[] args) {

@@ -2,8 +2,13 @@ package Controller;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.List;
+
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import DAO.HolidayDAOImpl;
 import Model.Employe;
@@ -151,7 +156,62 @@ public class HolidayController {
 			}
 		});
 		
+		view.getImportButton().addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fileChooser = new JFileChooser();
+				fileChooser.setFileFilter(new FileNameExtensionFilter("Fichiers CSV", "txt"));
+				
+				if(fileChooser.showOpenDialog(view) == JFileChooser.APPROVE_OPTION) {
+					try {
+						String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+						model.importData(filePath);
+						view.refreshTable(model.getHoliday());
+						view.showSuccessMessage("Importation réussie");
+					} catch (IOException ex) {
+						view.showErrorMessage("Erreur lors de l'importation: " + ex.getMessage());
+					}
+				}
+			}
+			
+		});
 		
+		view.getExportButton().addActionListener(new ActionListener() {
+			
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+		        JFileChooser fileChooser = new JFileChooser();
+		        fileChooser.setFileFilter(new FileNameExtensionFilter("Fichiers CSV", "txt"));
+		        fileChooser.setDialogTitle("Choisissez un emplacement pour exporter");
+
+		        // Show save dialog and check user action
+		        int userSelection = fileChooser.showSaveDialog(view);
+		        if (userSelection == JFileChooser.APPROVE_OPTION) {
+		            try {
+		                // Get the selected file
+		                String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+		                
+		                // Ensure the file has a .txt extension
+		                if (!filePath.toLowerCase().endsWith(".txt")) {
+		                    filePath += ".txt";
+		                }
+
+		                // Fetch data and export it
+		                List<String[]> holidays = model.ListHoliday();
+		                model.exportData(filePath, holidays);
+		                view.showSuccessMessage("Exportation réussie");
+
+		            } catch (IOException ex) {
+		                view.showErrorMessage("Erreur lors de l'exportation: " + ex.getMessage());
+		            }
+		        } else {
+		            // Handle cancel action (optional)
+		            view.showErrorMessage("Exportation annulée.");
+		        }
+		    }
+		});
+
 	}
 	
 }

@@ -48,20 +48,4 @@ public class loginDAOImpl {
 
         return null;  // Return null if login fails or role is invalid
     }
-    
-    public boolean addUser(String username, String hashedPassword) {
-        String sql = "INSERT INTO login (idEmp, username, password) VALUES (?, ?, ?)";
-        
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-        	stmt.setInt(1, 22);
-            stmt.setString(2, username);
-            stmt.setString(3, hashedPassword);
-            int rowsInserted = stmt.executeUpdate();
-            
-            return rowsInserted > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 }

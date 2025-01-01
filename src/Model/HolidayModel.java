@@ -1,9 +1,12 @@
 package Model;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.List;
 
 import DAO.HolidayDAOImpl;
 import Model.Holiday.HolidayType;
@@ -80,6 +83,14 @@ public class HolidayModel {
 		dao.delete(employe);
 	}
 	
+	public void importData(String filePath) throws IOException {
+    	dao.importData(filePath);
+    }
+    
+    public void exportData(String filePath, List<String[]> data) throws IOException {
+    	dao.exportDataSt(filePath, data);
+    }
+	
 	public int getIdEmp(String fullName) throws Exception { 
 		int idEmp = dao.getIdEmp(fullName);
 		if (idEmp == -1) {
@@ -92,18 +103,30 @@ public class HolidayModel {
 		return dao.getHolidayBySelecteId(id);
 	}
 	
-	public static void main(String[] args) {
-		HolidayDAOImpl dao = new HolidayDAOImpl();
-		HolidayModel md = new HolidayModel(dao);
-		int rs;
-		try {
-			System.out.println(md.getIdEmp("Jane Smith"));
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+	public List<String[]> ListHoliday() {
+		return dao.ListHoliday();
 	}
+	
+	private boolean checkFieExists(File file) {
+    	if(!file.exists()) {
+    		throw new IllegalArgumentException("Le fichier n'existe pas: " + file.getPath());
+    	}
+    	return true;
+    }
+    
+    private boolean checkIsFile(File file) {
+    	if(!file.isFile()) {
+    		throw new IllegalArgumentException("Le chemin spécifié n'est pas un fichier : " + file.getPath());
+    	}
+    	return true;
+    }
+    
+    private boolean checkIsReadable (File file) {
+    	if(!file.canRead()) {
+    		throw new IllegalArgumentException("Le fichier n'est pas lisible: " + file.getPath());
+    	}
+    	return true;
+    }
 }
 
 

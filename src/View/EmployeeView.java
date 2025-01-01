@@ -2,11 +2,13 @@ package View;
 
 import java.awt.*;
 import java.util.*;
+import java.util.function.Consumer;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 import DAO.EmployeeDAOImpl;
+import Model.Employe;
 import Model.Employe.Poste;
 import Model.Employe.Role;
 import Model.EmployeModel;
@@ -18,6 +20,9 @@ public class EmployeeView extends JPanel{
 	JButton deleteButton = new JButton("Supprimer");
 	JButton listButton = new JButton("Afficher");
 	JButton findIdButton = new JButton("Trouver");
+	JButton importButton = new JButton("Import");
+	JButton exportButton = new JButton("Export");
+	JButton createUserAcc = new JButton("Ajouter un compte");
 	JTextField nom = new JTextField(20);
 	JTextField prenom = new JTextField(20);
 	JTextField email = new JTextField(20);
@@ -78,6 +83,9 @@ public class EmployeeView extends JPanel{
 		buttons.add(deleteButton);
 		buttons.add(listButton);
 		buttons.add(findIdButton);
+		buttons.add(importButton);
+		buttons.add(exportButton);
+		buttons.add(createUserAcc);
 		
 		add(buttons, BorderLayout.SOUTH);
 	}	
@@ -131,6 +139,59 @@ public class EmployeeView extends JPanel{
         }
 	}
 	
+	public void createUserAcc(ArrayList<Employe> emps, Consumer<Map<String, String>> onSubmit) {
+	    JComboBox employees = new JComboBox(emps.toArray());
+	    JTextField user = new JTextField(20);
+	    JPasswordField pass = new JPasswordField(20);
+
+	    JPanel panel = new JPanel();
+	    panel.setLayout(new GridLayout(3,2));
+	    panel.add(new JLabel("Employe:"));
+	    panel.add(employees);
+	    panel.add(new JLabel("Username:"));
+	    panel.add(user);
+	    panel.add(new JLabel("Password:"));
+	    panel.add(pass);
+
+	    // Create a dialog to display the panel
+	    JDialog dialog = new JDialog((JFrame) SwingUtilities.getWindowAncestor(this), "Add New User Account", true); // Modal dialog
+	    dialog.setLayout(new BorderLayout());
+	    dialog.add(panel, BorderLayout.CENTER);
+
+	    JButton submitButton = new JButton("Submit");
+	    submitButton.addActionListener(e -> {
+	        String selectedEmployee = (String) employees.getSelectedItem().toString();
+	        String username = user.getText();
+	        String password = pass.getText();
+
+	        if (selectedEmployee != null && !username.trim().isEmpty() && !password.trim().isEmpty()) {
+	            // Prepare the data and pass it to the callback
+	            Map<String, String> data = new HashMap<>();
+	            data.put("employee", selectedEmployee);
+	            data.put("username", username);
+	            data.put("password", password);
+
+	            onSubmit.accept(data); // Send data to the controller
+	            dialog.dispose(); // Close the dialog
+	        } else {
+	            JOptionPane.showMessageDialog(dialog, "Please fill out all fields.", "Error", JOptionPane.ERROR_MESSAGE);
+	        }
+	    });
+	    dialog.add(submitButton, BorderLayout.SOUTH);
+	    dialog.pack();
+	    dialog.setLocationRelativeTo(this);
+	    dialog.setVisible(true);
+	}
+
+	
+	public void showSuccessMessage(String message) {
+        JOptionPane.showMessageDialog(this, message, "Succès", JOptionPane.INFORMATION_MESSAGE);
+    }
+	
+	public void showErrorMessage(String message) {
+        JOptionPane.showMessageDialog(this, message, "Erreur", JOptionPane.ERROR_MESSAGE);
+    }
+	
 	public boolean validateFields() {
 	    if (nom.getText().isEmpty() || prenom.getText().isEmpty() || email.getText().isEmpty() || tel.getText().isEmpty() || salaire.getText().isEmpty()) {
 	        JOptionPane.showMessageDialog(this, "All fields are required!", "Validation Error", JOptionPane.ERROR_MESSAGE);
@@ -152,10 +213,16 @@ public class EmployeeView extends JPanel{
 	        addButton.setVisible(true);
 	        updateButton.setVisible(true);
 	        deleteButton.setVisible(true);
+	        importButton.setVisible(true);
+	        exportButton.setVisible(true);
+	        createUserAcc.setVisible(true);
 	    } else {
 	        addButton.setVisible(false);
 	        updateButton.setVisible(false);
 	        deleteButton.setVisible(false);
+	        importButton.setVisible(false);
+	        exportButton.setVisible(false);
+	        createUserAcc.setVisible(false);
 	    }
 	}
 
@@ -178,6 +245,18 @@ public class EmployeeView extends JPanel{
 	public JButton getFindIdButton() {
         return findIdButton;
     }
+	
+	public JButton getImportButton() {
+        return importButton;
+    }
+	
+	public JButton getExportButton() {
+        return exportButton;
+    }
+	
+	public JButton getAddAccButton() {
+		return createUserAcc;
+	}
 	
 	public JTextField getNom() {
 		return nom;

@@ -68,6 +68,11 @@ public class Employe {
         this.nom = nom;
         this.prenom = prenom;
     }
+    
+    public Employe(String nom, String prenom) {
+        this.nom = nom;
+        this.prenom = prenom;
+    }
 
     public enum Poste {
         INGENIEUR_ETUDE_ET_DEVELOPPEMENT,

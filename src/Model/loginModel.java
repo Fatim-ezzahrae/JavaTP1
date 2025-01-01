@@ -23,9 +23,4 @@ public class loginModel {
 
         return userRole.name();  // Return the user's role
     }
-    
-    public boolean addUser(String username, String hashedPassword) {
-        // Add user to database
-        return dao.addUser(username, hashedPassword);
-    }
 }

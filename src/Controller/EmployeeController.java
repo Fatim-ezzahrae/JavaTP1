@@ -2,9 +2,16 @@ package Controller;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.mindrot.jbcrypt.BCrypt;
 
 import DAO.EmployeeDAOImpl;
 import Model.Employe;
@@ -166,6 +173,98 @@ public class EmployeeController {
             }
 			
 		});
+		
+		view.getImportButton().addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fileChooser = new JFileChooser();
+				fileChooser.setFileFilter(new FileNameExtensionFilter("Fichiers CSV", "txt"));
+				
+				if(fileChooser.showOpenDialog(view) == JFileChooser.APPROVE_OPTION) {
+					try {
+						String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+						employeModel.importData(filePath);
+						view.showSuccessMessage("Importation réussie");
+					} catch (IOException ex) {
+						view.showErrorMessage("Erreur lors de l'importation: " + ex.getMessage());
+					}
+				}
+			}
+			
+		});
+		
+		view.getExportButton().addActionListener(new ActionListener() {
+			
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+		        JFileChooser fileChooser = new JFileChooser();
+		        fileChooser.setFileFilter(new FileNameExtensionFilter("Fichiers txt", "txt"));
+		        fileChooser.setDialogTitle("Choisissez un emplacement pour exporter");
+
+		        // Show save dialog and check user action
+		        int userSelection = fileChooser.showSaveDialog(view);
+		        if (userSelection == JFileChooser.APPROVE_OPTION) {
+		            try {
+		                // Get the selected file
+		                String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+		                
+		                // Ensure the file has a .txt extension
+		                if (!filePath.toLowerCase().endsWith(".txt")) {
+		                    filePath += ".txt";
+		                }
+
+		                // Fetch data and export it
+		                List<Employe> employes = employeModel.listEmployes();
+		                employeModel.exportData(filePath, employes);
+		                view.showSuccessMessage("Exportation réussie");
+
+		            } catch (IOException ex) {
+		                view.showErrorMessage("Erreur lors de l'exportation: " + ex.getMessage());
+		            }
+		        } else {
+		            // Handle cancel action (optional)
+		            view.showErrorMessage("Exportation annulée.");
+		        }
+		    }
+		});
+		
+		view.getAddAccButton().addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ArrayList<Employe> emps;
+				try {
+					emps = employeModel.ListEmployes_NomPre();
+					// Pass a callback to handle the data submitted by the user
+		            view.createUserAcc(emps, (data) -> {
+		                // This is the callback that will be invoked when the user submits the form
+		                String employee = data.get("employee");
+		                String username = data.get("username");
+		                String password = data.get("password");
+		                
+		                int idEmp = employeModel.getEmpId(employee);
+		                String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+		                // Call the model method to add the user to the database
+                        boolean success = employeModel.addUser(idEmp, username, hashedPassword);
+
+                        if (success) {
+                            JOptionPane.showMessageDialog(view, "User added successfully!");
+                        } else {
+                            JOptionPane.showMessageDialog(view, "Failed to add user.");
+                        }
+		                
+		                // Here you can call methods on the model to save the data
+		                // For example: employeModel.addUserAccount(employee, username, password);
+		            });
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+			
+		});
+
 	}
 	
 	private Employe extractEmployeeFromFields() throws IllegalArgumentException {

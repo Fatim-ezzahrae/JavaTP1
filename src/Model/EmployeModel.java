@@ -1,5 +1,7 @@
 package Model;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,16 @@ public class EmployeModel {
         employeDAO.add(employe);
     }
 
+    public List<Employe> listEmployes() {
+    	try {
+			return employeDAO.ListEmployes();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return null;
+    }
+    
     // Update an existing employee
     public void updateEmployee(Employe employe, int id) throws Exception {
         if (id <= 0) {
@@ -47,6 +59,14 @@ public class EmployeModel {
         } catch (SQLException e) {
             throw new Exception("Error while deleting employee: " + e.getMessage(), e);
         }
+    }
+    
+    public void importData(String filePath) throws IOException {
+    	employeDAO.importData(filePath);
+    }
+    
+    public void exportData(String filePath, List<Employe> data) throws IOException {
+    	employeDAO.exportData(filePath, data);
     }
 
     // Validate employee data
@@ -90,7 +110,41 @@ public class EmployeModel {
         }
     }
     
+    public int getEmpId(String fullName) {
+    	return employeDAO.getEmpId(fullName);
+    }
+    
+	public boolean addUser(int id, String username, String hashedPassword) {
+		return employeDAO.addUser(id, username, hashedPassword);
+	}
+    
+    public ArrayList<Employe> ListEmployes_NomPre() throws Exception {
+    	return employeDAO.ListEmployes_NomPre();
+    }
+    
     public Object[][] findById(int employeId) throws Exception{
     	return employeDAO.findById(employeId);
     }
+    
+    private boolean checkFieExists(File file) {
+    	if(!file.exists()) {
+    		throw new IllegalArgumentException("Le fichier n'existe pas: " + file.getPath());
+    	}
+    	return true;
+    }
+    
+    private boolean checkIsFile(File file) {
+    	if(!file.isFile()) {
+    		throw new IllegalArgumentException("Le chemin spécifié n'est pas un fichier : " + file.getPath());
+    	}
+    	return true;
+    }
+    
+    private boolean checkIsReadable (File file) {
+    	if(!file.canRead()) {
+    		throw new IllegalArgumentException("Le fichier n'est pas lisible: " + file.getPath());
+    	}
+    	return true;
+    }
+    
 }
