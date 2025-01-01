@@ -382,8 +382,7 @@ public class HolidayDAOImpl implements GenericDAOI<Holiday>, DataImportExport<Ho
 		    System.out.println("Holiday imported successfully!");            
 		} catch (IOException | SQLException e) {
 		    e.printStackTrace();    
-		}
-		
+		}		
 	}
 	
 	@Override

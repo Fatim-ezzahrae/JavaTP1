@@ -33,10 +33,6 @@ public class HolidayView extends JPanel{
 	String[] tableColumns = {"ID", "Employé", "Date de début", "Date de fin", "Type", "idEmp"};
 	
 	public HolidayView() {
-		
-		
-		
-		
 		ArrayList<String> employes = dao.getEmployees();
 		employees = new JComboBox<>(employes.toArray(new String[0]));
 		
